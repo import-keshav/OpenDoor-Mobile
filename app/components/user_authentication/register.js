@@ -3,7 +3,6 @@ import {
     Text
 } from 'react-native';
 
-
 class Register extends Component {
     render() {
         return(

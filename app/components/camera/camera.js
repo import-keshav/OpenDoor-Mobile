@@ -1,12 +1,15 @@
+'use strict';
 import React, {Component} from 'react';
 import {
-    CameraRoll,
     PermissionsAndroid,
+    Platform,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
+import CameraRoll from "@react-native-community/cameraroll";
 import { RNCamera } from 'react-native-camera';
+import GestureRecognizer from 'react-native-swipe-gestures';
 
 
 class Camera extends Component {
@@ -15,61 +18,68 @@ class Camera extends Component {
         super();
         this.takePicture = this.takePicture.bind(this);
         this.savePicture = this.savePicture.bind(this);
+        this.requestCameraPermission = this.requestCameraPermission.bind(this);
         this.state = {};
-
-        async function requestCameraPermission() {
-            try {
-              const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-                {
-                  title: 'Cool Photo App Camera Permission',
-                  message:
-                    'Cool Photo App needs access to your camera ' +
-                    'so you can take awesome pictures.',
-                  buttonNeutral: 'Ask Me Later',
-                  buttonNegative: 'Cancel',
-                  buttonPositive: 'OK',
-                },
-              );
-              if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('You can use the camera');
-              } else {
-                console.log('Camera permission denied');
-              }
-            } catch (err) {
-              console.warn(err);
-            }
-        }
-
     };
 
     static navigationOptions = {
         header: null
     };
 
-    takePicture = async() => {
+
+    requestCameraPermission = async () => {
+        try {
+            const permission = PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+            await PermissionsAndroid.request(permission);
+            Promise.resolve();
+        } catch (error) {
+            Promise.reject(error);
+        }
+    }
+
+
+    takePicture = async () => {
         if (this.camera) {
-            const options = { quality: 0.5, base64: true };
+            const options = { quality: 0.5, base64: true,  doNotSave: false};
             const data = await this.camera.takePictureAsync(options);
             if(data) {
-                CameraRoll.saveToCameraRoll(data.uri);
-                console.log('saved')
+                this.savePicture();
             }
         }
     };
 
+    savePicture = async () => {
+        try {
+            if (Platform.OS === 'android') {
+                await this.requestCameraPermission();
+            }
+            CameraRoll.saveToCameraRoll(data.uri);
+            Promise.resolve()
+        } catch (error) {
+            Promise.reject(error)
+        }
+    }
 
-    savePicture() {
-        console.log('saving image');
-        CameraRoll.saveToCameraRoll(this.state.image);
-        console.log('save succesfully');
+    onSwipe = (gestureName) => {
+        if (gestureName === 'SWIPE_LEFT') {
+            this.props.navigation.navigate('cameraroll')
+        }
     }
 
     render() {
 
+        const config = {
+            velocityThreshold: 0.3,
+            directionalOffsetThreshold: 80
+          };
 
         return(
-            <View style={styles.container}>
+            <GestureRecognizer
+                    onSwipe={(direction, state) => this.onSwipe(direction)}
+                    config={config}
+                    style={styles.container}>
+
+                <View style={styles.container}>
 
                 <RNCamera 
                     ref = { ref => {this.camera = ref; }}
@@ -77,20 +87,20 @@ class Camera extends Component {
                     type={RNCamera.Constants.Type.back}
                 />
 
-
                 <View style={styles.button}>                
                     <TouchableOpacity onPress={this.takePicture} style={styles.camera_button_text}>
                         <Text>Click</Text>  
                     </TouchableOpacity>
                 </View>
 
-                <View style={[styles.button, styles.save_button]}>                
+                {/* <View style={[styles.button, styles.save_button]}>                
                     <TouchableOpacity onPress={this.savePicture} style={styles.camera_button_text}>
                         <Text>Save</Text>  
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
-            </View>
+                </View>
+            </GestureRecognizer>
 
         )
     };
@@ -101,15 +111,12 @@ const styles = {
         flex: 1,
     },
     camera: {
-        flex: 1
+        flex: 1,
     },
     button: {
         height: 70,
         borderWidth: 5,
-        borderColor: '#16a085'
-    },
-    camera_button: {
-        backfaceVisibility: 'visible'
+        borderColor: '#16a085',
     },
     camera_button_text: {
         color: 'black',
