@@ -48,6 +48,7 @@ class Camera extends Component {
         }
     };
 
+
     savePicture = async () => {
         try {
             if (Platform.OS === 'android') {
@@ -60,11 +61,13 @@ class Camera extends Component {
         }
     }
 
-    onSwipe = (gestureName) => {
-        if (gestureName === 'SWIPE_LEFT') {
-            this.props.navigation.navigate('cameraroll')
+
+    onSwipe = (direction) => {
+        if (direction === 'SWIPE_LEFT') {
+            this.props.navigation.navigate('camerarollapp')
         }
     }
+
 
     render() {
 
@@ -75,7 +78,7 @@ class Camera extends Component {
 
         return(
             <GestureRecognizer
-                    onSwipe={(direction, state) => this.onSwipe(direction)}
+                    onSwipe={(direction) => this.onSwipe(direction)}
                     config={config}
                     style={styles.container}>
 

@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import {
     CameraRoll,
-    Text,
+    Image,
+    ScrollView,
     View
 } from 'react-native';
+import GestureRecognizer from 'react-native-swipe-gestures';
 
 
 class CameraRollApp extends Component {
@@ -11,34 +13,71 @@ class CameraRollApp extends Component {
     constructor() {
         super();
         this.state = {};
-        this.getCameraRollPics = this.getCameraRollPics.bind(this);
+
+        // Extracting images from external memory.
+        CameraRoll.getPhotos({
+            first: 20,
+            assetType: 'Photos',
+        }).then((response) => {
+            photos_list = response.edges
+            image_tag_list = []
+            photos_list.forEach(photo => {
+                image_tag_list.push(
+                    <Image style={styles.image_tag}
+                        source={{uri: photo.node.image.uri}}
+                    />
+                )
+            });
+            this.setState({
+                photos: image_tag_list
+            })
+        }).catch((err) => {
+            console.warn(err);
+        })
     };
 
     static navigationOptions = {
         header: null
     };
 
-    getCameraRollPics = () => {
-        CameraRoll.getPhotos({
-            first: 20,
-            assetType: 'Photos',
-        }).then((response) => {
-            console.log('done')
-            this.setState({
-                photos: response.edges});
-        }).catch((err) => {
-            console.warn(err);
-        })
+    onSwipe = (direction) => {
+        if (direction === 'SWIPE_RIGHT') {
+            this.props.navigation.navigate('camera')
+        }
     };
 
     render() {
-        console.warn(this.state)
-        return (
-            <View>
-                <Text>CameraRoll</Text>
-            </View>
+
+        const config = {
+            velocityThreshold: 0.3,
+            directionalOffsetThreshold: 80
+          };
+
+          return (
+            <GestureRecognizer
+                style={styles.container}
+                onSwipe={(direction) => {this.onSwipe(direction)}}
+                config={config}>
+                <View>
+                    <ScrollView>
+                        {this.state.photos}
+                    </ScrollView>
+                </View>
+            </GestureRecognizer>
         )
     }
 };
+
+
+const styles = {
+    container: {
+        flex: 1
+    },
+    image_tag: {
+        width: 100,
+        height: 100,
+        margin: 10,
+    }
+}
 
 export default CameraRollApp;
