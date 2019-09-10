@@ -1,7 +1,7 @@
 import { createStackNavigator } from 'react-navigation-stack';
 
 import Camera from './components/camera/camera';
-import CameraRollApp from './components/memories/camerarollapp';
+import CameraRollApp from './components/memories/camerarollapp/camerarollapp';
 import Login from './components/user_authentication/login'
 import Register from './components/user_authentication/register';
 

@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import GestureRecognizer from 'react-native-swipe-gestures';
 
+import styles from './styles'
 
 class CameraRollApp extends Component {
 
@@ -67,17 +68,5 @@ class CameraRollApp extends Component {
         )
     }
 };
-
-
-const styles = {
-    container: {
-        flex: 1
-    },
-    image_tag: {
-        width: 100,
-        height: 100,
-        margin: 10,
-    }
-}
 
 export default CameraRollApp;
